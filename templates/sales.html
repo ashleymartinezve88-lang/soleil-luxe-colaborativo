@@ -1,0 +1,15 @@
+{% extends "layout.html" %}{% block content %}
+<div class="top"><div><h1>Ventas y pedidos</h1><p>Registra el pedido y actualiza el inventario automáticamente.</p></div></div>
+<div class="section"><h2>Nueva venta</h2><form method="post"><div class="formgrid">
+<div class="field"><label>Producto</label><select name="product_id" id="product" required>{% for p in products %}<option value="{{p.id}}" data-price="{{p.price}}" data-stock="{{p.stock}}">{{p.name}} · ${{"{:,.0f}".format(p.price)}} · stock {{p.stock}}</option>{% endfor %}</select></div>
+<div class="field"><label>Cliente</label><select name="customer_id"><option value="">Cliente ocasional</option>{% for c in customers %}<option value="{{c.id}}">{{c.name}} · {{c.channel}}</option>{% endfor %}</select></div>
+<div class="field"><label>Cantidad</label><input id="qty" name="quantity" type="number" min="1" value="1" required></div>
+<div class="field"><label>Total estimado</label><input id="total" value="$75.000" readonly></div></div><div class="actions"><button class="btn gold">Registrar venta</button></div></form></div>
+<div class="section"><h2>Historial de ventas</h2><table><thead><tr><th>Pedido</th><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Cantidad</th><th>Total</th></tr></thead><tbody>
+{% for s in sales %}<tr><td>#SL-{{'%04d'|format(s.id)}}</td><td>{{s.created_at}}</td><td>{{s.customer_name}}</td><td>{{s.product_name}}</td><td>{{s.quantity}}</td><td>${{"{:,.0f}".format(s.total)}}</td></tr>{% else %}<tr><td colspan="6" class="empty">No hay ventas.</td></tr>{% endfor %}
+</tbody></table></div>
+<script>
+const product=document.getElementById('product'), qty=document.getElementById('qty'), total=document.getElementById('total');
+function calc(){let o=product.options[product.selectedIndex];let v=Number(o.dataset.price)*Number(qty.value||0);total.value='$'+v.toLocaleString('es-CO');}
+product.addEventListener('change',calc);qty.addEventListener('input',calc);calc();
+</script>{% endblock %}

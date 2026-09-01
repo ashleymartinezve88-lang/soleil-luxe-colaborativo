@@ -1,0 +1,7 @@
+{% extends "layout.html" %}{% block content %}
+<div class="top"><div><h1>Clientes</h1><p>Centraliza los contactos que llegan desde los canales digitales.</p></div></div>
+<div class="section"><h2>Nuevo cliente</h2><form method="post"><div class="formgrid">
+<div class="field"><label>Nombre</label><input name="name" required></div><div class="field"><label>Teléfono</label><input name="phone" placeholder="+57 ..."></div>
+<div class="field"><label>Canal principal</label><select name="channel"><option>WhatsApp</option><option>Instagram</option><option>Otro</option></select></div></div><div class="actions"><button class="btn gold">Guardar cliente</button></div></form></div>
+<div class="section"><h2>Directorio</h2><table><thead><tr><th>Cliente</th><th>Contacto</th><th>Canal</th></tr></thead><tbody>{% for c in customers %}<tr><td><b>{{c.name}}</b></td><td>{{c.phone or '—'}}</td><td><span class="status">{{c.channel}}</span></td></tr>{% else %}<tr><td colspan="3" class="empty">No hay clientes registrados.</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

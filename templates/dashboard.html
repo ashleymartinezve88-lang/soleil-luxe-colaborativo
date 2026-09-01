@@ -1,0 +1,19 @@
+{% extends "layout.html" %}{% block content %}
+<div class="top"><div><h1>Buenos días, Soleil Luxe</h1><p>Centro de control operativo · trazabilidad en tiempo real</p></div><div class="badge">● Sistema local activo</div></div>
+<div class="hero"><h2>Elegancia que también se administra.</h2><p>Centraliza inventario, ventas y contabilidad básica en un solo lugar, manteniendo el flujo de atención conectado con el modelo comercial de WhatsApp e Instagram.</p></div>
+<div class="cards">
+<div class="card"><div class="label">Ventas acumuladas</div><div class="metric">${{ "{:,.0f}".format(total_sales) }}</div><div class="label">Registro histórico</div></div>
+<div class="card"><div class="label">Inventario disponible</div><div class="metric">{{stock_units}} <span class="label">unid.</span></div><div class="label">{{low_stock}} productos requieren atención</div></div>
+<div class="card"><div class="label">Egresos registrados</div><div class="metric">${{ "{:,.0f}".format(total_expenses) }}</div><div class="label">Control financiero básico</div></div>
+<div class="card"><div class="label">Resultado</div><div class="metric gold">${{ "{:,.0f}".format(total_sales-total_expenses) }}</div><div class="label">Ingresos − egresos</div></div>
+</div>
+<div class="grid2"><div class="section"><h2>Últimas ventas</h2>
+{% if sales %}<table><thead><tr><th>Pedido</th><th>Cliente</th><th>Producto</th><th>Total</th></tr></thead><tbody>
+{% for s in sales %}<tr><td>#SL-{{'%04d'|format(s.id)}}</td><td>{{s.customer_name}}</td><td>{{s.product_name}}</td><td>${{"{:,.0f}".format(s.total)}}</td></tr>{% endfor %}
+</tbody></table>{% else %}<div class="empty">Aún no hay ventas registradas.</div>{% endif %}</div>
+<div class="section"><h2>Metas del proyecto</h2>
+<div class="kpi"><span class="label">Discrepancias de inventario</span><strong>−80%</strong><div class="progress"><span style="width:80%"></span></div></div><br>
+<div class="kpi"><span class="label">Tiempo de procesamiento</span><strong>−60%</strong><div class="progress"><span style="width:60%"></span></div></div><br>
+<div class="kpi"><span class="label">Satisfacción objetivo</span><strong>4,8 / 5</strong><div class="progress"><span style="width:96%"></span></div></div>
+</div></div>
+{% endblock %}

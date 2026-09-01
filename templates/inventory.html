@@ -1,0 +1,13 @@
+{% extends "layout.html" %}{% block content %}
+<div class="top"><div><h1>Inventario</h1><p>Productos, existencias y niveles mínimos.</p></div></div>
+<div class="section"><h2>Agregar producto</h2><form method="post"><div class="formgrid">
+<div class="field"><label>Nombre de fragancia</label><input name="name" required placeholder="Ej. Élite Noir"></div>
+<div class="field"><label>Categoría</label><input name="category" value="Fragancia"></div>
+<div class="field"><label>Precio COP</label><input name="price" type="number" value="75000" required></div>
+<div class="field"><label>Stock inicial</label><input name="stock" type="number" min="0" value="0" required></div>
+<div class="field"><label>Stock mínimo</label><input name="min_stock" type="number" min="0" value="5"></div></div><div class="actions"><button class="btn gold">+ Agregar al inventario</button></div></form></div>
+<div class="section"><h2>Existencias actuales</h2><table><thead><tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Mínimo</th><th>Estado</th><th>Actualizar</th></tr></thead><tbody>
+{% for p in products %}<tr><td><b>{{p.name}}</b></td><td>{{p.category}}</td><td>${{"{:,.0f}".format(p.price)}}</td><td>{{p.stock}}</td><td>{{p.min_stock}}</td>
+<td>{% if p.stock==0 %}<span class="status out">Agotado</span>{% elif p.stock<=p.min_stock %}<span class="status low">Stock bajo</span>{% else %}<span class="status ok">Disponible</span>{% endif %}</td>
+<td><form method="post" action="{{url_for('inventory_update',pid=p.id)}}" style="display:flex;gap:5px"><input name="stock" type="number" min="0" value="{{p.stock}}" style="width:80px"><input name="price" type="number" value="{{p.price}}" style="width:100px"><input name="min_stock" type="number" value="{{p.min_stock}}" style="width:65px"><button class="btn black">Guardar</button></form></td></tr>{% endfor %}
+</tbody></table></div>{% endblock %}

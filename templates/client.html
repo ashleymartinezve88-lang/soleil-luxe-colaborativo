@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="client-shell">
+  <div class="client-topbar"><a class="client-logo" href="/cliente"><span>SL</span> SOLEIL LUXE</a><div class="collab-chip">ESPACIO COLABORATIVO <i></i></div><a class="admin-link" href="/">Vista Soleil Luxe →</a></div>
+  <section class="client-hero">
+    <div><p class="eyebrow">Soleil Luxe · colaboración inteligente</p><h1>Construyamos tu pedido<br><em>en el mismo espacio.</em></h1><p class="lead">Explora las fragancias, define cantidades y presupuesto y deja que Lucy analice la combinación al instante.</p></div>
+    <div class="hero-orb"><span>SL</span><small>PREMIUM<br>COLLECTION</small></div>
+  </section>
+  <div class="client-grid">
+    <section class="catalog-panel">
+      <div class="panel-heading"><div><span class="eyebrow">Catálogo</span><h2>Fragancias disponibles</h2></div><span id="productCount">{{ products|length }} referencias</span></div>
+      <div class="product-grid">
+      {% for p in products %}
+        <article class="product-card" data-id="{{p.id}}" data-name="{{p.name}}" data-price="{{p.price}}" data-stock="{{p.stock}}">
+          <div class="product-photo"><img src="{{ product_images.get(p.name, '/static/products/collection.png') }}" alt="{{p.name}}"><span class="availability {% if p.stock<=p.min_stock %}limited{% endif %}">{% if p.stock<=p.min_stock %}Disponibilidad limitada{% else %}Disponible{% endif %}</span></div>
+          <div class="product-info"><div class="product-cat">{{p.category}}</div><h3>{{p.name}}</h3><p>{{p.category.replace('Fragancia ','') if p.category.startswith('Fragancia ') else p.category}}</p><div class="product-bottom"><strong>${{ '{:,.0f}'.format(p.price) }}</strong><div class="qty"><button onclick="changeQty({{p.id}},-1)">−</button><span id="qty-{{p.id}}">0</span><button onclick="changeQty({{p.id}},1)">+</button></div></div></div>
+        </article>
+      {% endfor %}
+      </div>
+    </section>
+    <aside class="decision-panel">
+      <div class="decision-head"><div class="lucy-mini">L</div><div><b>Lucy</b><span>Asistente de decisión</span></div><span class="live-dot">● EN VIVO</span></div>
+      <div class="insight" id="insight"><b>Empecemos.</b><br>Selecciona productos y cantidad. Analizaré tu pedido mientras lo construyes.</div>
+      <div class="field-client"><label>Tu nombre</label><input id="clientName" placeholder="Ej. Laura Gómez"></div>
+      <div class="field-client"><label>Empresa / cliente</label><input id="company" placeholder="Opcional"></div>
+      <div class="budget-row"><label>Presupuesto objetivo</label><strong id="budgetValue">$1.500.000</strong></div>
+      <input class="range" id="budget" type="range" min="300000" max="5000000" step="50000" value="1500000" oninput="updateBudget()">
+      <div class="range-labels"><span>$300K</span><span>$5M</span></div>
+      <div class="metrics"><div><span>Unidades</span><b id="units">0</b></div><div><span>Total</span><b id="total">$0</b></div><div><span>Ajuste</span><b id="fit">—</b></div></div>
+      <div class="bar-label"><span>Uso del presupuesto</span><b id="budgetPct">0%</b></div><div class="budget-bar"><i id="budgetBar"></i></div>
+      <div class="field-client"><label>¿Qué necesitas que analicemos?</label><textarea id="notes" rows="3" placeholder="Ej. Quiero variedad sin superar mi presupuesto."></textarea></div>
+      <button class="submit-order" onclick="sendOrder()">Enviar propuesta a Soleil Luxe <span>→</span></button>
+      <p class="micro">Tu selección se comparte con el equipo de Soleil Luxe en este espacio colaborativo.</p>
+    </aside>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const cart={};
+function money(n){return new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}).format(n)}
+function changeQty(id,delta){const card=document.querySelector(`.product-card[data-id="${id}"]`);const stock=+card.dataset.stock;cart[id]=Math.max(0,Math.min(stock,(cart[id]||0)+delta));document.getElementById('qty-'+id).textContent=cart[id];analyze()}
+function updateBudget(){document.getElementById('budgetValue').textContent=money(+document.getElementById('budget').value);analyze()}
+function analyze(){let units=0,total=0,limited=false;document.querySelectorAll('.product-card').forEach(c=>{let q=cart[c.dataset.id]||0;units+=q;total+=q*+c.dataset.price;if(q>0 && +c.dataset.stock<=5)limited=true});let budget=+document.getElementById('budget').value;let pct=budget?Math.round(total/budget*100):0;document.getElementById('units').textContent=units;document.getElementById('total').textContent=money(total);document.getElementById('budgetPct').textContent=pct+'%';document.getElementById('budgetBar').style.width=Math.min(100,pct)+'%';let fit='—',txt='<b>Empecemos.</b><br>Selecciona productos y cantidad. Analizaré tu pedido mientras lo construyes.';if(units){if(total>budget){fit='Ajustar';txt='<b>⚠️ Presupuesto superado.</b><br>Puedo ayudarte a reducir cantidades o cambiar la combinación para mantener el objetivo.'}else if(total>budget*.8){fit='92%';txt='<b>Buena combinación.</b><br>Estás usando '+pct+'% del presupuesto. Todavía tienes margen para ajustar cantidades.'}else{fit='98%';txt='<b>Selección equilibrada.</b><br>Hay margen disponible. Si buscas variedad, puedo sugerirte cómo repartirlo.'}if(limited)txt+='<br><small>También detecté una referencia con disponibilidad limitada.</small>'}document.getElementById('fit').textContent=fit;document.getElementById('insight').innerHTML=txt}
+async function sendOrder(){const name=document.getElementById('clientName').value.trim();if(!name){toast('Escribe tu nombre para enviar la propuesta.');return}const items=Object.entries(cart).filter(([id,q])=>q>0).map(([id,q])=>({product_id:+id,quantity:q}));if(!items.length){toast('Selecciona al menos un producto.');return}const res=await fetch('/api/collab/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({client_name:name,company:document.getElementById('company').value,budget:+document.getElementById('budget').value,notes:document.getElementById('notes').value,items})});const data=await res.json();if(data.ok){toast('✓ Propuesta enviada. Soleil Luxe ya puede verla.');document.getElementById('insight').innerHTML='<b>¡Listo! ✨</b><br>Tu propuesta #'+data.order_id+' ya está en el espacio compartido. El equipo puede analizarla y actualizar su estado.'}else toast(data.error||'No fue posible enviar la propuesta.')}
+function toast(t){const x=document.getElementById('toast');x.textContent=t;x.classList.add('show');setTimeout(()=>x.classList.remove('show'),3000)}
+analyze();updateBudget();
+</script>
+{% endblock %}

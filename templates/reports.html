@@ -1,0 +1,13 @@
+{% extends "layout.html" %}{% block content %}
+<div class="top"><div><h1>Reportes</h1><p>Información histórica para apoyar decisiones de compras y ventas.</p></div></div>
+<div class="grid2"><div class="section"><h2>Ventas por producto</h2><table><thead><tr><th>Producto</th><th>Unidades</th><th>Ingresos</th></tr></thead><tbody>{% for r in sales_by_product %}<tr><td>{{r.name}}</td><td>{{r.units}}</td><td>${{"{:,.0f}".format(r.revenue)}}</td></tr>{% else %}<tr><td colspan="3" class="empty">Aún no hay datos históricos.</td></tr>{% endfor %}</tbody></table></div>
+<div class="section"><h2>Alertas de inventario</h2>{% for p in low %}<div class="kpi" style="margin-bottom:10px"><b>{{p.name}}</b><br><span class="label">{{p.stock}} unidades · mínimo {{p.min_stock}}</span></div>{% else %}<div class="empty">Todo el inventario está sobre el mínimo.</div>{% endfor %}</div></div>
+<div class="section"><h2>Indicadores objetivo del proyecto</h2><div class="kpis">
+<div class="kpi"><span class="label">Discrepancias inventario</span><strong>−80%</strong><span class="label">primeros 3 meses</span></div>
+<div class="kpi"><span class="label">Errores de despacho</span><strong>−50%</strong><span class="label">primeros 4 meses</span></div>
+<div class="kpi"><span class="label">Procesamiento</span><strong>−60%</strong><span class="label">registro + contabilidad</span></div>
+<div class="kpi"><span class="label">Ingresos mensuales</span><strong>+20%</strong><span class="label">primeros 6 meses</span></div>
+<div class="kpi"><span class="label">Recompra WhatsApp</span><strong>+15%</strong><span class="label">primeros 6 meses</span></div>
+<div class="kpi"><span class="label">Satisfacción</span><strong>4,8/5</strong><span class="label">primeros 3 meses</span></div>
+</div></div>
+{% endblock %}
